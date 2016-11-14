@@ -81,14 +81,7 @@ SDL_Texture* loadTexture(std::string path) {
 }
 
 bool loadMedia() {
-	/* Load Splash Image */
-	gTexture = loadTexture(getResourcePath() + "background.png");
-
-	if (gTexture == nullptr) {
-		logError(std::cout, "Failed to load media.");
-		return false;
-	}
-
+	//Nothing to load
 	return true;
 }
 
@@ -124,10 +117,31 @@ int main (int argc, char** argv) {
 		}
 
 		//Clear screen
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		//Render texture to screen
-		SDL_RenderCopy(gRenderer, gTexture, nullptr, nullptr);
+		//Render red-filled rectangle
+		SDL_Rect fillRect = {SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4,
+			SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}; //{x,y,w,h}
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+		SDL_RenderFillRect(gRenderer, &fillRect);
+
+		//Render green-outlined rectangle
+		SDL_Rect outlineRect = {SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6,
+			SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3}; //{x,y,w,h}
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+		SDL_RenderDrawRect(gRenderer, &outlineRect);
+
+		//Draw blue horizontal line
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+		SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2,
+			SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+
+		//Draw vertical line of yellow dots
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
+		for(int i = 0; i < SCREEN_HEIGHT; i += 4) {
+			SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
+		}
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
