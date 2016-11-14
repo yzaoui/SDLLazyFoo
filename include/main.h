@@ -12,35 +12,35 @@
 bool init();
 
 /**
+ * Frees surface and window, and shuts down SDL.
+ */
+void close();
+
+/**
+ * Loads an individual image as a texture.
+ *
+ * @param  path The path to the image.
+ * @return      An SDL_Texture holding the image.
+ */
+SDL_Texture* loadTexture(std::string path);
+
+/**
  * Loads media.
  *
  * @return true on success, false on failure.
  */
 bool loadMedia();
 
-/**
- * Frees surface and window, and shuts down SDL.
- */
-void close();
-
-/**
- * Loads an individual image.
- *
- * @param  path The path to the image.
- * @return      An SDL_Surface holding the image.
- */
-SDL_Surface* loadSurfaceFromImage(std::string path);
-
 
 
 //The window we'll be rendering to
 SDL_Window* gWindow = nullptr;
 
-//The surface contained by the window
-SDL_Surface* gScreenSurface = nullptr;
+//The window's renderer
+SDL_Renderer* gRenderer = nullptr;
 
-//The image we will load and show on the screen
-SDL_Surface* gImage = nullptr;
+//The currently displayed texture
+SDL_Texture* gTexture = nullptr;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;

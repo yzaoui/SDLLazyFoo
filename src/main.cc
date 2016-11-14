@@ -14,12 +14,22 @@ bool init() {
 	}
 
 	/* Create Window */
-	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
+	gWindow = SDL_CreateWindow("SDL Testing", SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (gWindow == nullptr) {
 		logSDLError(std::cout, "SDL_CreateWindow");
 		return false;
 	}
+
+	/* Create renderer for window */
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	if (gRenderer == nullptr) {
+		logSDLError(std::cout, "SDL_CreateRenderer");
+		return false;
+	}
+
+	/* Initialize renderer color */
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);	//RGBa, 8-bit ints
 
 	/* Initialize PNG loading */
 	const int imgFlags = IMG_INIT_PNG;
@@ -28,40 +38,28 @@ bool init() {
 		return false;
 	}
 
-	/* Get Window Surface */
-	gScreenSurface = SDL_GetWindowSurface(gWindow);
-
-	return true;
-}
-
-bool loadMedia() {
-	/* Load Splash Image */
-	gImage = loadSurfaceFromImage(getResourcePath() + "scale.bmp");
-
-	if (gImage == nullptr) {
-		logError(std::cout, "Failed to load media.");
-		return false;
-	}
-
 	return true;
 }
 
 void close() {
-	/* Deallocate Surface */
-	SDL_FreeSurface(gImage);
-	gImage = nullptr;
+	/* Free Loaded Texture */
+	SDL_DestroyTexture(gTexture);
+	gTexture = nullptr;
 
 	/* Destroy Window */
+	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
+	gRenderer = nullptr;
 	gWindow = nullptr;
 
 	/* Quit SDL Subsystems */
+	IMG_Quit();
 	SDL_Quit();
 }
 
-SDL_Surface* loadSurfaceFromImage(std::string path) {
-	//The final optimized image
-	SDL_Surface* optimizedSurface = nullptr;
+SDL_Texture* loadTexture(std::string path) {
+	//The final texture
+	SDL_Texture* newTexture = nullptr;
 
 	//Load image from specified path
 	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
@@ -69,20 +67,29 @@ SDL_Surface* loadSurfaceFromImage(std::string path) {
 	if (loadedSurface == nullptr) {
 		logIMGError(std::cout, "IMG_Load");
 	} else {
-		//Convert surface to screen format
-		optimizedSurface = SDL_ConvertSurface(loadedSurface,
-			gScreenSurface->format, 0);
-
-		if (optimizedSurface == nullptr) {
-			logError(std::cout, "Unable to optimize image.");
-			logSDLError(std::cout, "SDL_ConvertSurface");
+		//Create texture from surface
+		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+		if (newTexture == nullptr) {
+			logSDLError(std::cout, "SDL_CreateTextureFromSurface");
 		}
 
 		//Free old loaded surface
 		SDL_FreeSurface(loadedSurface);
 	}
 
-	return optimizedSurface;
+	return newTexture;
+}
+
+bool loadMedia() {
+	/* Load Splash Image */
+	gTexture = loadTexture(getResourcePath() + "background.png");
+
+	if (gTexture == nullptr) {
+		logError(std::cout, "Failed to load media.");
+		return false;
+	}
+
+	return true;
 }
 
 int main (int argc, char** argv) {
@@ -116,16 +123,14 @@ int main (int argc, char** argv) {
 			}
 		}
 
-		//Apply the stretched image
-		SDL_Rect stretchRect;
-		stretchRect.x = 0;
-		stretchRect.y = 0;
-		stretchRect.w = SCREEN_WIDTH;
-		stretchRect.h = SCREEN_HEIGHT;
-		SDL_BlitScaled(gImage, nullptr, gScreenSurface, &stretchRect);
+		//Clear screen
+		SDL_RenderClear(gRenderer);
 
-		//Update the window surface
-		SDL_UpdateWindowSurface(gWindow);
+		//Render texture to screen
+		SDL_RenderCopy(gRenderer, gTexture, nullptr, nullptr);
+
+		//Update screen
+		SDL_RenderPresent(gRenderer);
 	}
 
 	close();
