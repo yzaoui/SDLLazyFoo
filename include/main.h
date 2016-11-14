@@ -1,7 +1,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#include <iostream>
+#include <SDL.h>
 #include <string>
 
 /**
@@ -22,6 +22,25 @@ bool loadMedia();
  * Frees surface and window, and shuts down SDL.
  */
 void close();
+
+/**
+ * Loads an individual image.
+ *
+ * @param  path The path to the BMP image.
+ * @return      An SDL_Surface holding the image.
+ */
+SDL_Surface* loadSurfaceFromBMP(std::string path);
+
+
+
+//The window we'll be rendering to
+SDL_Window* gWindow = nullptr;
+
+//The surface contained by the window
+SDL_Surface* gScreenSurface = nullptr;
+
+//The image we will load and show on the screen
+SDL_Surface* gImage = nullptr;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;

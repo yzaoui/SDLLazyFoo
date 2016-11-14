@@ -1,18 +1,9 @@
-#include <SDL.h>
+#include "main.h"
+
 #include <iostream>
 
 #include "log_error.h"
-#include "main.h"
 #include "res_path.h"
-
-//The window we'll be rendering to
-SDL_Window* gWindow = nullptr;
-
-//The surface contained by the window
-SDL_Surface* gScreenSurface = nullptr;
-
-//The image we will load and show on the screen
-SDL_Surface* gImage = nullptr;
 
 bool init() {
 	/* Initialize SDL */
@@ -37,12 +28,13 @@ bool init() {
 
 bool loadMedia() {
 	/* Load Splash Image */
-	std::string resPath = getResourcePath() + "hello_world.bmp";
-	gImage = SDL_LoadBMP(resPath.c_str());
+	gImage = loadSurfaceFromBMP(getResourcePath() + "hello_world.bmp");
+
 	if (gImage == nullptr) {
-		logSDLError(std::cout, "SDL_LoadBMP");
+		logError(std::cout, "Failed to load media.");
 		return false;
 	}
+
 	return true;
 }
 
@@ -59,12 +51,15 @@ void close() {
 	SDL_Quit();
 }
 
-void logSDLError(std::ostream& os, const std::string& msg) {
-	logError(os, msg + " error: " + SDL_GetError());
-}
+SDL_Surface* loadSurfaceFromBMP(std::string path) {
+	//Load image from specified path
+	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
 
-void logError(std::ostream& os, const std::string& msg) {
-	os << msg << std::endl;
+	if (loadedSurface == nullptr) {
+		logSDLError(std::cout, "SDL_LoadBMP");
+	}
+
+	return loadedSurface;
 }
 
 int main (int argc, char** argv) {
@@ -78,7 +73,6 @@ int main (int argc, char** argv) {
 	}
 	/* Load Media */
 	if (!loadMedia()) {
-		logError(std::cout, "Failed to load media.");
 		close();
 		return 1;
 	}
