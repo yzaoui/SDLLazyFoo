@@ -42,9 +42,9 @@ bool init() {
 }
 
 void close() {
-	/* Free Loaded Texture */
-	SDL_DestroyTexture(gTexture);
-	gTexture = nullptr;
+	/* Free Loaded Textures */
+	gPersonTexture.free();
+	gFieldsTexture.free();
 
 	/* Destroy Window */
 	SDL_DestroyRenderer(gRenderer);
@@ -57,35 +57,16 @@ void close() {
 	SDL_Quit();
 }
 
-SDL_Texture* loadTexture(std::string path) {
-	//The final texture
-	SDL_Texture* newTexture = nullptr;
-
-	//Load image from specified path
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-
-	if (loadedSurface == nullptr) {
-		logIMGError(std::cout, "IMG_Load");
-	} else {
-		//Create texture from surface
-		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-		if (newTexture == nullptr) {
-			logSDLError(std::cout, "SDL_CreateTextureFromSurface");
-		}
-
-		//Free old loaded surface
-		SDL_FreeSurface(loadedSurface);
+bool loadMedia() {
+	//Load person texture
+	if (!gPersonTexture.loadFromFile(getResourcePath() + "person.png")) {
+		logError(std::cout, "Failed to load person texture.");
+		return false;
 	}
 
-	return newTexture;
-}
-
-bool loadMedia() {
-	/* Load Splash Image */
-	gTexture = loadTexture(getResourcePath() + "viewport.png");
-
-	if (gTexture == nullptr) {
-		logError(std::cout, "Failed to load media.");
+	//Load fields texture
+	if (!gFieldsTexture.loadFromFile(getResourcePath() + "fields.png")) {
+		logError(std::cout, "Failed to load fields texture.");
 		return false;
 	}
 
@@ -129,26 +110,11 @@ int main (int argc, char** argv) {
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		//Top-left viewport
-		SDL_Rect topLeftViewport = {0, 0,
-			SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
-		SDL_RenderSetViewport(gRenderer, &topLeftViewport);
-		//Render texture to screen
-		SDL_RenderCopy(gRenderer, gTexture, nullptr, nullptr);
+		//Render fields texture to screen
+		gFieldsTexture.render(0, 0);
 
-		//Top-right viewport
-		SDL_Rect topRightViewport = {SCREEN_WIDTH / 2, 0,
-			SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
-		SDL_RenderSetViewport(gRenderer, &topRightViewport);
-		//Render texture to screen
-		SDL_RenderCopy(gRenderer, gTexture, nullptr, nullptr);
-
-		//Bottom viewport
-		SDL_Rect bottomViewport = {0, SCREEN_HEIGHT / 2,
-			SCREEN_WIDTH, SCREEN_HEIGHT / 2};
-		SDL_RenderSetViewport(gRenderer, &bottomViewport);
-		//Render texture to screen
-		SDL_RenderCopy(gRenderer, gTexture, nullptr, nullptr);
+		//Render person texture to screen
+		gPersonTexture.render(250, 200);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);

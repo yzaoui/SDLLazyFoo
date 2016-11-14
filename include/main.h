@@ -4,6 +4,8 @@
 #include <SDL.h>
 #include <string>
 
+#include "MyTexture.h"
+
 /**
  * Starts up SD and creates a window.
  *
@@ -15,14 +17,6 @@ bool init();
  * Frees surface and window, and shuts down SDL.
  */
 void close();
-
-/**
- * Loads an individual image as a texture.
- *
- * @param  path The path to the image.
- * @return      An SDL_Texture holding the image.
- */
-SDL_Texture* loadTexture(std::string path);
 
 /**
  * Loads media.
@@ -39,8 +33,9 @@ SDL_Window* gWindow = nullptr;
 //The window's renderer
 SDL_Renderer* gRenderer = nullptr;
 
-//The currently displayed texture
-SDL_Texture* gTexture = nullptr;
+//Scene textures
+MyTexture gPersonTexture;
+MyTexture gFieldsTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
