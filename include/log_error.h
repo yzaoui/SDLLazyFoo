@@ -12,6 +12,13 @@
  */
 void logSDLError(std::ostream& os, const std::string& msg);
 
+/**
+ * Log an SDL_image error with an error message to the output stream.
+ *
+ * @param os  The output stream to write the message to.
+ * @param msg The error message to write, with format "{msg} error: {IMG_GetError()}".
+ */
+void logIMGError(std::ostream& os, const std::string& msg);
 
 /**
  * Log an error message to the output stream.

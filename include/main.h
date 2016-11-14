@@ -26,10 +26,10 @@ void close();
 /**
  * Loads an individual image.
  *
- * @param  path The path to the BMP image.
+ * @param  path The path to the image.
  * @return      An SDL_Surface holding the image.
  */
-SDL_Surface* loadSurfaceFromBMP(std::string path);
+SDL_Surface* loadSurfaceFromImage(std::string path);
 
 
 

@@ -1,6 +1,7 @@
 #include "main.h"
 
 #include <iostream>
+#include <SDL_image.h>
 
 #include "log_error.h"
 #include "res_path.h"
@@ -20,6 +21,13 @@ bool init() {
 		return false;
 	}
 
+	/* Initialize PNG loading */
+	const int imgFlags = IMG_INIT_PNG;
+	if (!(IMG_Init(imgFlags) & imgFlags)) {
+		logIMGError(std::cout, "IMG_Init");
+		return false;
+	}
+
 	/* Get Window Surface */
 	gScreenSurface = SDL_GetWindowSurface(gWindow);
 
@@ -28,7 +36,7 @@ bool init() {
 
 bool loadMedia() {
 	/* Load Splash Image */
-	gImage = loadSurfaceFromBMP(getResourcePath() + "scale.bmp");
+	gImage = loadSurfaceFromImage(getResourcePath() + "scale.bmp");
 
 	if (gImage == nullptr) {
 		logError(std::cout, "Failed to load media.");
@@ -51,15 +59,15 @@ void close() {
 	SDL_Quit();
 }
 
-SDL_Surface* loadSurfaceFromBMP(std::string path) {
+SDL_Surface* loadSurfaceFromImage(std::string path) {
 	//The final optimized image
 	SDL_Surface* optimizedSurface = nullptr;
 
 	//Load image from specified path
-	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 
 	if (loadedSurface == nullptr) {
-		logSDLError(std::cout, "SDL_LoadBMP");
+		logIMGError(std::cout, "IMG_Load");
 	} else {
 		//Convert surface to screen format
 		optimizedSurface = SDL_ConvertSurface(loadedSurface,
