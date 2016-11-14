@@ -12,7 +12,7 @@ SDL_Window* gWindow = nullptr;
 SDL_Surface* gScreenSurface = nullptr;
 
 //The image we will load and show on the screen
-SDL_Surface* gHelloWorld = nullptr;
+SDL_Surface* gImage = nullptr;
 
 bool init() {
 	/* Initialize SDL */
@@ -38,8 +38,8 @@ bool init() {
 bool loadMedia() {
 	/* Load Splash Image */
 	std::string resPath = getResourcePath() + "hello_world.bmp";
-	gHelloWorld = SDL_LoadBMP(resPath.c_str());
-	if (gHelloWorld == nullptr) {
+	gImage = SDL_LoadBMP(resPath.c_str());
+	if (gImage == nullptr) {
 		logSDLError(std::cout, "SDL_LoadBMP");
 		return false;
 	}
@@ -48,8 +48,8 @@ bool loadMedia() {
 
 void close() {
 	/* Deallocate Surface */
-	SDL_FreeSurface(gHelloWorld);
-	gHelloWorld = nullptr;
+	SDL_FreeSurface(gImage);
+	gImage = nullptr;
 
 	/* Destroy Window */
 	SDL_DestroyWindow(gWindow);
@@ -82,12 +82,28 @@ int main (int argc, char** argv) {
 		close();
 		return 1;
 	}
-	//Apply the image
-	SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, NULL);
-	//Update it
-	SDL_UpdateWindowSurface(gWindow);
-	//Wait two seconds
-	SDL_Delay(2000);
+
+	/******************************
+	 * Game Loop
+	 ******************************/
+	//Main loop flag
+	bool quit = false;
+	//Main event handler
+	SDL_Event event;
+
+	while (!quit) {
+		while (SDL_PollEvent(&event) != 0) {
+			//User requests to quit
+			if (event.type == SDL_QUIT) {
+				quit = true;
+			}
+		}
+
+		//Apply the image
+		SDL_BlitSurface(gImage, nullptr, gScreenSurface, nullptr);
+		//Update the window surface
+		SDL_UpdateWindowSurface(gWindow);
+	}
 
 	close();
 
