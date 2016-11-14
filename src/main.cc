@@ -28,7 +28,7 @@ bool init() {
 
 bool loadMedia() {
 	/* Load Splash Image */
-	gImage = loadSurfaceFromBMP(getResourcePath() + "hello_world.bmp");
+	gImage = loadSurfaceFromBMP(getResourcePath() + "scale.bmp");
 
 	if (gImage == nullptr) {
 		logError(std::cout, "Failed to load media.");
@@ -52,14 +52,29 @@ void close() {
 }
 
 SDL_Surface* loadSurfaceFromBMP(std::string path) {
+	//The final optimized image
+	SDL_Surface* optimizedSurface = nullptr;
+
 	//Load image from specified path
 	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
 
 	if (loadedSurface == nullptr) {
 		logSDLError(std::cout, "SDL_LoadBMP");
+	} else {
+		//Convert surface to screen format
+		optimizedSurface = SDL_ConvertSurface(loadedSurface,
+			gScreenSurface->format, 0);
+
+		if (optimizedSurface == nullptr) {
+			logError(std::cout, "Unable to optimize image.");
+			logSDLError(std::cout, "SDL_ConvertSurface");
+		}
+
+		//Free old loaded surface
+		SDL_FreeSurface(loadedSurface);
 	}
 
-	return loadedSurface;
+	return optimizedSurface;
 }
 
 int main (int argc, char** argv) {
@@ -93,8 +108,14 @@ int main (int argc, char** argv) {
 			}
 		}
 
-		//Apply the image
-		SDL_BlitSurface(gImage, nullptr, gScreenSurface, nullptr);
+		//Apply the stretched image
+		SDL_Rect stretchRect;
+		stretchRect.x = 0;
+		stretchRect.y = 0;
+		stretchRect.w = SCREEN_WIDTH;
+		stretchRect.h = SCREEN_HEIGHT;
+		SDL_BlitScaled(gImage, nullptr, gScreenSurface, &stretchRect);
+
 		//Update the window surface
 		SDL_UpdateWindowSurface(gWindow);
 	}
