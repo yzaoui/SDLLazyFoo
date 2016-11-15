@@ -34,8 +34,9 @@ SDL_Window* gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
 
 //Scene textures
-MyTexture gPersonTexture;
-MyTexture gFieldsTexture;
+MyTexture gSpriteSheetTexture;
+SDL_Rect gSpriteClips[4];
+MyTexture gRashu;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;

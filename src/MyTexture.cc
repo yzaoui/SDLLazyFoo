@@ -63,10 +63,18 @@ void MyTexture::free() {
 	}
 }
 
-void MyTexture::render(int x, int y) {
+void MyTexture::render(int x, int y, SDL_Rect* clip) {
 	//Set rendering space and render to screen
 	SDL_Rect renderQuad = {x, y, width_, height_};
-	SDL_RenderCopy(gRenderer, texture_, nullptr, &renderQuad);
+
+	//Set clip rendering dimensions
+	if (clip != nullptr) {
+		renderQuad.w = clip->w;
+		renderQuad.h = clip->h;
+	}
+
+	//Render to screen
+	SDL_RenderCopy(gRenderer, texture_, clip, &renderQuad);
 }
 
 int MyTexture::getWidth() {

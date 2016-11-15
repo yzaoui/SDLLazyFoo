@@ -43,8 +43,7 @@ bool init() {
 
 void close() {
 	/* Free Loaded Textures */
-	gPersonTexture.free();
-	gFieldsTexture.free();
+	gSpriteSheetTexture.free();
 
 	/* Destroy Window */
 	SDL_DestroyRenderer(gRenderer);
@@ -58,16 +57,19 @@ void close() {
 }
 
 bool loadMedia() {
-	//Load person texture
-	if (!gPersonTexture.loadFromFile(getResourcePath() + "person.png")) {
-		logError(std::cout, "Failed to load person texture.");
+	//Load sprite sheet texture
+	if (!gSpriteSheetTexture.loadFromFile(getResourcePath() + "sprites.png")) {
+		logError(std::cout, "Failed to load sprite sheet texture.");
 		return false;
 	}
 
-	//Load fields texture
-	if (!gFieldsTexture.loadFromFile(getResourcePath() + "fields.png")) {
-		logError(std::cout, "Failed to load fields texture.");
+	if (!gRashu.loadFromFile(getResourcePath() + "rashu.png")) {
+		logError(std::cout, "Failed to load sprite sheet texture.");
 		return false;
+	}
+
+	for (int i = 0; i < 4; i++) {
+		gSpriteClips[i] = {i*40, 0, 40, 40};
 	}
 
 	return true;
@@ -110,11 +112,25 @@ int main (int argc, char** argv) {
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		//Render fields texture to screen
-		gFieldsTexture.render(0, 0);
+		/* Really bad coordinate system */
 
-		//Render person texture to screen
-		gPersonTexture.render(250, 200);
+		for (int i = 0; i < 16; i++) {
+			gSpriteSheetTexture.render(i * 40, 440, &gSpriteClips[1]);
+		}
+
+		for (int i = 0; i < 9; i++) {
+			gSpriteSheetTexture.render(200, 80 + i*40, &gSpriteClips[1]);
+		}
+
+		for (int i = 0; i < 9; i++) {
+			gSpriteSheetTexture.render(400, 80 + i*40, &gSpriteClips[1]);
+		}
+
+		for (int i = 0; i < 4; i++) {
+			gSpriteSheetTexture.render((6+i)*40, 80, &gSpriteClips[2]);
+		}
+
+		gRashu.render(300, 160, &gSpriteClips[0]);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
