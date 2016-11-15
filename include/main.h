@@ -37,6 +37,8 @@ SDL_Renderer* gRenderer = nullptr;
 MyTexture gSpriteSheetTexture;
 SDL_Rect gSpriteClips[4];
 MyTexture gRashu;
+MyTexture gFadeInTexture;
+MyTexture gFadeOutTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;

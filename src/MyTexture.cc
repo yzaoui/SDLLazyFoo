@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 
 #include "log_error.h"
+#include "res_path.h"
 
 //Do this better later on
 extern SDL_Window* gWindow;
@@ -26,6 +27,7 @@ bool MyTexture::loadFromFile(std::string path) {
 	SDL_Texture* newTexture = nullptr;
 
 	//Load image from specified path
+	path = getResourcePath() + path;
 	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 
 	if (loadedSurface == nullptr) {
@@ -66,6 +68,14 @@ void MyTexture::free() {
 void MyTexture::setColor(Uint8 red, Uint8 green, Uint8 blue) {
 	//Modulate texture
 	SDL_SetTextureColorMod(texture_, red, green, blue);
+}
+
+void MyTexture::setBlendMode(SDL_BlendMode blending) {
+	SDL_SetTextureBlendMode(texture_, blending);
+}
+
+void MyTexture::setAlpha(Uint8 alpha) {
+	SDL_SetTextureAlphaMod(texture_, alpha);
 }
 
 void MyTexture::render(int x, int y, SDL_Rect* clip) {

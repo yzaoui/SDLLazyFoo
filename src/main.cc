@@ -58,13 +58,24 @@ void close() {
 
 bool loadMedia() {
 	//Load sprite sheet texture
-	if (!gSpriteSheetTexture.loadFromFile(getResourcePath() + "sprites.png")) {
+	if (!gSpriteSheetTexture.loadFromFile("sprites.png")) {
 		logError(std::cout, "Failed to load sprite sheet texture.");
 		return false;
 	}
 
-	if (!gRashu.loadFromFile(getResourcePath() + "rashu.png")) {
-		logError(std::cout, "Failed to load sprite sheet texture.");
+	if (!gRashu.loadFromFile("rashu.png")) {
+		logError(std::cout, "Failed to load rashu texture.");
+		return false;
+	}
+
+	if (!gFadeOutTexture.loadFromFile("fadeout.png")) {
+		logError(std::cout, "Failed to load fade out texture.");
+		return false;
+	}
+	gFadeOutTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+
+	if (!gFadeInTexture.loadFromFile("fadein.png")) {
+		logError(std::cout, "Failed to load fade in texture.");
 		return false;
 	}
 
@@ -101,35 +112,42 @@ int main (int argc, char** argv) {
 	Uint8 r = 255;
 	Uint8 g = 255;
 	Uint8 b = 255;
+	Uint8 a = 255;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
 			//User requests to quit
 			//Either by closing window, or by pressing the esc key
 			if (event.type == SDL_QUIT ||
-					event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
 
 			//On keypress change RGB values
 			} else if (event.type == SDL_KEYDOWN) {
 				switch(event.key.keysym.sym) {
-					case SDLK_q:
+					case SDLK_e:
 						r += 32;
 						break;
-					case SDLK_w:
+					case SDLK_r:
 						g += 32;
 						break;
-					case SDLK_e:
+					case SDLK_t:
 						b += 32;
 						break;
-					case SDLK_a:
+					case SDLK_d:
 						r -= 32;
 						break;
-					case SDLK_s:
+					case SDLK_f:
 						g -= 32;
 						break;
-					case SDLK_d:
+					case SDLK_g:
 						b -= 32;
+						break;
+					case SDLK_w:
+						a = (a + 32 > 255 ? 255 : a + 32);
+						break;
+					case SDLK_s:
+						a = (a - 32 < 0 ? 0 : a - 32);
 						break;
 				}
 			}
@@ -138,6 +156,8 @@ int main (int argc, char** argv) {
 		//Clear screen
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
+
+		gFadeInTexture.render(0, 0);
 
 		//Modulate and render texture
 		gSpriteSheetTexture.setColor(r, g, b);
@@ -161,6 +181,9 @@ int main (int argc, char** argv) {
 		}
 
 		gRashu.render(300, 160, &gSpriteClips[0]);
+
+		gFadeOutTexture.setAlpha(a);
+		gFadeOutTexture.render(0, 0);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
