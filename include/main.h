@@ -33,12 +33,10 @@ SDL_Window* gWindow = nullptr;
 //The window's renderer
 SDL_Renderer* gRenderer = nullptr;
 
-//Scene textures
-MyTexture gSpriteSheetTexture;
-SDL_Rect gSpriteClips[4];
-MyTexture gRashu;
-MyTexture gFadeInTexture;
-MyTexture gFadeOutTexture;
+//Walking animation
+const int WALK_ANIM_FRAMES = 4;
+SDL_Rect gWalkClips[WALK_ANIM_FRAMES];
+MyTexture gWalkTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;

@@ -22,7 +22,8 @@ bool init() {
 	}
 
 	/* Create renderer for window */
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	gRenderer = SDL_CreateRenderer(gWindow, -1,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (gRenderer == nullptr) {
 		logSDLError(std::cout, "SDL_CreateRenderer");
 		return false;
@@ -43,7 +44,7 @@ bool init() {
 
 void close() {
 	/* Free Loaded Textures */
-	gSpriteSheetTexture.free();
+	gWalkTexture.free();
 
 	/* Destroy Window */
 	SDL_DestroyRenderer(gRenderer);
@@ -58,29 +59,13 @@ void close() {
 
 bool loadMedia() {
 	//Load sprite sheet texture
-	if (!gSpriteSheetTexture.loadFromFile("sprites.png")) {
+	if (!gWalkTexture.loadFromFile("walk.png")) {
 		logError(std::cout, "Failed to load sprite sheet texture.");
 		return false;
 	}
 
-	if (!gRashu.loadFromFile("rashu.png")) {
-		logError(std::cout, "Failed to load rashu texture.");
-		return false;
-	}
-
-	if (!gFadeOutTexture.loadFromFile("fadeout.png")) {
-		logError(std::cout, "Failed to load fade out texture.");
-		return false;
-	}
-	gFadeOutTexture.setBlendMode(SDL_BLENDMODE_BLEND);
-
-	if (!gFadeInTexture.loadFromFile("fadein.png")) {
-		logError(std::cout, "Failed to load fade in texture.");
-		return false;
-	}
-
 	for (int i = 0; i < 4; i++) {
-		gSpriteClips[i] = {i*40, 0, 40, 40};
+		gWalkClips[i] = {i*120, 0, 120, 200};
 	}
 
 	return true;
@@ -108,11 +93,8 @@ int main (int argc, char** argv) {
 	bool quit = false;
 	//Main event handler
 	SDL_Event event;
-	//Modulation components
-	Uint8 r = 255;
-	Uint8 g = 255;
-	Uint8 b = 255;
-	Uint8 a = 255;
+	//Current animation frame
+	int frame = 0;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
@@ -121,72 +103,20 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
-
-			//On keypress change RGB values
-			} else if (event.type == SDL_KEYDOWN) {
-				switch(event.key.keysym.sym) {
-					case SDLK_e:
-						r += 32;
-						break;
-					case SDLK_r:
-						g += 32;
-						break;
-					case SDLK_t:
-						b += 32;
-						break;
-					case SDLK_d:
-						r -= 32;
-						break;
-					case SDLK_f:
-						g -= 32;
-						break;
-					case SDLK_g:
-						b -= 32;
-						break;
-					case SDLK_w:
-						a = (a + 32 > 255 ? 255 : a + 32);
-						break;
-					case SDLK_s:
-						a = (a - 32 < 0 ? 0 : a - 32);
-						break;
-				}
 			}
 		}
 
 		//Clear screen
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderClear(gRenderer);
+		SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+		SDL_RenderClear( gRenderer );
 
-		gFadeInTexture.render(0, 0);
-
-		//Modulate and render texture
-		gSpriteSheetTexture.setColor(r, g, b);
-
-		/* Really bad coordinate system */
-
-		for (int i = 0; i < 16; i++) {
-			gSpriteSheetTexture.render(i * 40, 440, &gSpriteClips[1]);
-		}
-
-		for (int i = 0; i < 9; i++) {
-			gSpriteSheetTexture.render(200, 80 + i*40, &gSpriteClips[1]);
-		}
-
-		for (int i = 0; i < 9; i++) {
-			gSpriteSheetTexture.render(400, 80 + i*40, &gSpriteClips[1]);
-		}
-
-		for (int i = 0; i < 4; i++) {
-			gSpriteSheetTexture.render((6+i)*40, 80, &gSpriteClips[2]);
-		}
-
-		gRashu.render(300, 160, &gSpriteClips[0]);
-
-		gFadeOutTexture.setAlpha(a);
-		gFadeOutTexture.render(0, 0);
+		SDL_Rect* currentClip = &gWalkClips[frame / 160];
+		gWalkTexture.render(0, 0, currentClip);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
+
+		frame = ((frame + 1) / 160 >= WALK_ANIM_FRAMES) ? 0 : frame + 1;
 	}
 
 	close();
