@@ -39,12 +39,21 @@ bool init() {
 		return false;
 	}
 
+	/* Initialize SDL_ttf */
+	if (TTF_Init() == -1) {
+		logTTFError(std::cout, "TTF_Init");
+	}
+
 	return true;
 }
 
 void close() {
 	/* Free Loaded Textures */
-	gArrowTexture.free();
+	gTextTexture.free();
+
+	/* Free Global Font */
+	TTF_CloseFont(gFont);
+	gFont = nullptr;
 
 	/* Destroy Window */
 	SDL_DestroyRenderer(gRenderer);
@@ -53,14 +62,26 @@ void close() {
 	gWindow = nullptr;
 
 	/* Quit SDL Subsystems */
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
 
 bool loadMedia() {
-	//Load sprite sheet texture
-	if (!gArrowTexture.loadFromFile("arrow.png")) {
-		logError(std::cout, "Failed to load sprite sheet texture.");
+	//Open the font
+	std::string path = getResourcePath() + "OpenSans-Regular.ttf";
+	gFont = TTF_OpenFont(path.c_str(), 28);
+
+	if (gFont == nullptr) {
+		logTTFError(std::cout, "TTF_OpenFont");
+		return false;
+	}
+
+	//Render text
+	SDL_Color textColor = {0, 0, 0}; //RGBa
+	if (!gTextTexture.loadFromRenderedText(
+		"The quick brown fox jumps over the lazy dog", textColor)) {
+		logError(std::cout, "Failed to render text texture.");
 		return false;
 	}
 
@@ -89,10 +110,6 @@ int main (int argc, char** argv) {
 	bool quit = false;
 	//Main event handler
 	SDL_Event event;
-	//Angle of rotation
-	double degrees = 0;
-	//Flip type
-	SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
@@ -101,24 +118,6 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
-			} else if (event.type == SDL_KEYDOWN) {
-				switch (event.key.keysym.sym) {
-					case SDLK_a:
-						degrees -= 60;
-						break;
-					case SDLK_d:
-						degrees += 60;
-						break;
-					case SDLK_q:
-						flipType = SDL_FLIP_HORIZONTAL;
-						break;
-					case SDLK_w:
-						flipType = SDL_FLIP_NONE;
-						break;
-					case SDLK_e:
-						flipType = SDL_FLIP_VERTICAL;
-						break;
-				}
 			}
 		}
 
@@ -126,12 +125,8 @@ int main (int argc, char** argv) {
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		//Render arrow
-		gArrowTexture.render(
-			(SCREEN_WIDTH - gArrowTexture.getWidth()) / 2,
-			(SCREEN_HEIGHT - gArrowTexture.getHeight()) / 2,
-			nullptr, degrees, nullptr, flipType
-		);
+		//Render text
+		gTextTexture.render(0, 0);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);

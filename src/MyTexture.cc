@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include "log_error.h"
 #include "res_path.h"
@@ -9,6 +10,7 @@
 //Do this better later on
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
+extern TTF_Font* gFont;
 
 MyTexture::MyTexture() {
 	texture_ = nullptr;
@@ -20,37 +22,50 @@ MyTexture::~MyTexture() {
 	free();
 }
 
+void MyTexture::load(SDL_Surface* surface) {
+	//Create texture from surface
+	texture_ = SDL_CreateTextureFromSurface(gRenderer, surface);
+
+	if (texture_ == nullptr) {
+		logSDLError(std::cout, "SDL_CreateTextureFromSurface");
+	} else {
+		width_ = surface->w;
+		height_ = surface->h;
+	}
+
+	//Free old surface
+	SDL_FreeSurface(surface);
+}
+
 bool MyTexture::loadFromFile(std::string path) {
 	free();
 
-	//The final texture
-	SDL_Texture* newTexture = nullptr;
+	path = getResourcePath() + path;
 
 	//Load image from specified path
-	path = getResourcePath() + path;
 	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 
 	if (loadedSurface == nullptr) {
 		logIMGError(std::cout, "IMG_Load");
 	} else {
-		//Color key image
-		SDL_SetColorKey(loadedSurface, SDL_TRUE,
-			SDL_MapRGB(loadedSurface->format, 0xFF, 0, 0xFF));
-
-		//Create texture from surface
-		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-		if (newTexture == nullptr) {
-			logSDLError(std::cout, "SDL_CreateTextureFromSurface");
-		} else {
-			width_ = loadedSurface->w;
-			height_ = loadedSurface->h;
-		}
-
-		//Free old loaded surface
-		SDL_FreeSurface(loadedSurface);
+		load(loadedSurface);
 	}
 
-	texture_ = newTexture;
+	return (texture_ != nullptr);
+
+}
+
+bool MyTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor) {
+	free();
+
+	//Render text surface
+	SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
+
+	if (textSurface == nullptr) {
+		logTTFError(std::cout, "TTF_RenderText_Solid");
+	} else {
+		load(textSurface);
+	}
 
 	return (texture_ != nullptr);
 }

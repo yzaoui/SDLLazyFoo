@@ -15,6 +15,9 @@ public:
 	//Load image from specified path
 	bool loadFromFile(std::string path);
 
+	//Load image from specified path
+	bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
+
 	//Deallocates texture
 	void free();
 
@@ -46,6 +49,8 @@ private:
 
 	//Image height
 	int height_;
+
+	void load(SDL_Surface* surface);
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define _MAIN_H
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <string>
 
 #include "MyTexture.h"
@@ -33,8 +34,11 @@ SDL_Window* gWindow = nullptr;
 //The window's renderer
 SDL_Renderer* gRenderer = nullptr;
 
+//Globally used font
+TTF_Font* gFont = nullptr;
+
 //Arrow texture
-MyTexture gArrowTexture;
+MyTexture gTextTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
