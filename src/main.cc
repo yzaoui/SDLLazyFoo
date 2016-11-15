@@ -44,7 +44,7 @@ bool init() {
 
 void close() {
 	/* Free Loaded Textures */
-	gWalkTexture.free();
+	gArrowTexture.free();
 
 	/* Destroy Window */
 	SDL_DestroyRenderer(gRenderer);
@@ -59,13 +59,9 @@ void close() {
 
 bool loadMedia() {
 	//Load sprite sheet texture
-	if (!gWalkTexture.loadFromFile("walk.png")) {
+	if (!gArrowTexture.loadFromFile("arrow.png")) {
 		logError(std::cout, "Failed to load sprite sheet texture.");
 		return false;
-	}
-
-	for (int i = 0; i < 4; i++) {
-		gWalkClips[i] = {i*120, 0, 120, 200};
 	}
 
 	return true;
@@ -93,8 +89,10 @@ int main (int argc, char** argv) {
 	bool quit = false;
 	//Main event handler
 	SDL_Event event;
-	//Current animation frame
-	int frame = 0;
+	//Angle of rotation
+	double degrees = 0;
+	//Flip type
+	SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
@@ -103,20 +101,40 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
+			} else if (event.type == SDL_KEYDOWN) {
+				switch (event.key.keysym.sym) {
+					case SDLK_a:
+						degrees -= 60;
+						break;
+					case SDLK_d:
+						degrees += 60;
+						break;
+					case SDLK_q:
+						flipType = SDL_FLIP_HORIZONTAL;
+						break;
+					case SDLK_w:
+						flipType = SDL_FLIP_NONE;
+						break;
+					case SDLK_e:
+						flipType = SDL_FLIP_VERTICAL;
+						break;
+				}
 			}
 		}
 
 		//Clear screen
-		SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-		SDL_RenderClear( gRenderer );
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderClear(gRenderer);
 
-		SDL_Rect* currentClip = &gWalkClips[frame / 160];
-		gWalkTexture.render(0, 0, currentClip);
+		//Render arrow
+		gArrowTexture.render(
+			(SCREEN_WIDTH - gArrowTexture.getWidth()) / 2,
+			(SCREEN_HEIGHT - gArrowTexture.getHeight()) / 2,
+			nullptr, degrees, nullptr, flipType
+		);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
-
-		frame = ((frame + 1) / 160 >= WALK_ANIM_FRAMES) ? 0 : frame + 1;
 	}
 
 	close();
