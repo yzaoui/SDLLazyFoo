@@ -97,6 +97,10 @@ int main (int argc, char** argv) {
 	bool quit = false;
 	//Main event handler
 	SDL_Event event;
+	//Modulation components
+	Uint8 r = 255;
+	Uint8 g = 255;
+	Uint8 b = 255;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
@@ -105,12 +109,38 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
 				quit = true;
+
+			//On keypress change RGB values
+			} else if (event.type == SDL_KEYDOWN) {
+				switch(event.key.keysym.sym) {
+					case SDLK_q:
+						r += 32;
+						break;
+					case SDLK_w:
+						g += 32;
+						break;
+					case SDLK_e:
+						b += 32;
+						break;
+					case SDLK_a:
+						r -= 32;
+						break;
+					case SDLK_s:
+						g -= 32;
+						break;
+					case SDLK_d:
+						b -= 32;
+						break;
+				}
 			}
 		}
 
 		//Clear screen
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
+
+		//Modulate and render texture
+		gSpriteSheetTexture.setColor(r, g, b);
 
 		/* Really bad coordinate system */
 

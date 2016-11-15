@@ -63,6 +63,11 @@ void MyTexture::free() {
 	}
 }
 
+void MyTexture::setColor(Uint8 red, Uint8 green, Uint8 blue) {
+	//Modulate texture
+	SDL_SetTextureColorMod(texture_, red, green, blue);
+}
+
 void MyTexture::render(int x, int y, SDL_Rect* clip) {
 	//Set rendering space and render to screen
 	SDL_Rect renderQuad = {x, y, width_, height_};
@@ -77,10 +82,10 @@ void MyTexture::render(int x, int y, SDL_Rect* clip) {
 	SDL_RenderCopy(gRenderer, texture_, clip, &renderQuad);
 }
 
-int MyTexture::getWidth() {
+int MyTexture::getWidth() const {
 	return width_;
 }
 
-int MyTexture::getHeight() {
+int MyTexture::getHeight() const {
 	return height_;
 }
