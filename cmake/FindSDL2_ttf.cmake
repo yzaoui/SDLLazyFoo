@@ -95,6 +95,7 @@ FIND_PATH(SDL2_TTF_INCLUDE_DIR SDL_ttf.h
 	$ENV{SDL2_TTF}
 	PATH_SUFFIXES include/SDL2 include SDL2
 	i686-w64-mingw32/include/SDL2
+	x86_64-w64-mingw32/include/SDL2
 	PATHS
 	~/Library/Frameworks
 	/Library/Frameworks
