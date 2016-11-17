@@ -17,5 +17,5 @@ void logTTFError(std::ostream& os, const std::string& msg) {
 }
 
 void logError(std::ostream& os, const std::string& msg) {
-	os << msg << std::endl;
+	SDL_Log(msg.c_str());
 }
