@@ -2,7 +2,7 @@
 # This module defines
 # SDL2_TTF_LIBRARY, the name of the library to link against
 # SDL2_TTF_FOUND, if false, do not try to link to SDL2_ttf
-# SDL2_TTF_INCLUDE_DIR, where to find SDL_image.h
+# SDL2_TTF_INCLUDE_DIR, where to find SDL_ttf.h
 #
 # Additional Note: If you see an empty SDL2_TTF_LIBRARY_TEMP in your configuration
 # and no SDL2_TTF_LIBRARY, it means CMake did not find your SDL2_Image library
