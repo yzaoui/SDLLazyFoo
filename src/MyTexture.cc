@@ -10,6 +10,7 @@
 //Do this better later on
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
+extern TTF_Font* gFont;
 
 MyTexture::MyTexture() {
 	texture_ = nullptr;
@@ -55,7 +56,7 @@ bool MyTexture::loadFromFile(std::string path) {
 }
 
 bool MyTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor) {
-	/*free();
+	free();
 
 	//Render text surface
 	SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
@@ -64,7 +65,7 @@ bool MyTexture::loadFromRenderedText(std::string textureText, SDL_Color textColo
 		logTTFError(std::cout, "TTF_RenderText_Solid");
 	} else {
 		load(textSurface);
-	}*/
+	}
 
 	return (texture_ != nullptr);
 }

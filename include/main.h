@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <SDL_mixer.h>
+#include <SDL_ttf.h>
 #include <string>
 
 #include "MyTexture.h"
@@ -34,17 +35,12 @@ SDL_Window* gWindow = nullptr;
 //The window's renderer
 SDL_Renderer* gRenderer = nullptr;
 
-//The prompt texture
-MyTexture gPromptTexture;
+//The global font
+TTF_Font* gFont;
 
-//The music that will be played
-Mix_Music* gMusic = nullptr;
-
-//The sound effects that will be used
-Mix_Chunk* gScratch = nullptr;
-Mix_Chunk* gHigh = nullptr;
-Mix_Chunk* gMedium = nullptr;
-Mix_Chunk* gLow = nullptr;
+//The prompt & text textures
+MyTexture gPromptTextTexture;
+MyTexture gTimeTextTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
