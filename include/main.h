@@ -39,9 +39,7 @@ SDL_Renderer* gRenderer = nullptr;
 TTF_Font* gFont;
 
 //The prompt & text textures
-MyTexture gStartPromptTextTexture;
-MyTexture gPausePromptTextTexture;
-MyTexture gTimeTextTexture;
+MyTexture gFPSTextTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;

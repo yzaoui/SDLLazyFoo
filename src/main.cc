@@ -63,27 +63,12 @@ bool loadMedia() {
 	/* Set Text Color */
 	SDL_Color textColor = {0, 0, 0, 255};
 
-	/* Load Start/Pause Prompt Textures */
-	if (!gStartPromptTextTexture.loadFromRenderedText(
-		"Press S to Start or Stop the Timer.", textColor)) {
-		logError(std::cout, "Failed to render start/stop prompt texture.");
-		return false;
-	}
-
-	if (!gPausePromptTextTexture.loadFromRenderedText(
-		"Press P to Pause or Unpause the Timer.", textColor)) {
-		logError(std::cout, "Failed to render pause/unpause prompt texture.");
-		return false;
-	}
-
 	return true;
 }
 
 void close() {
 	/* Free loaded textures */
-	gStartPromptTextTexture.free();
-	gPausePromptTextTexture.free();
-	gTimeTextTexture.free();
+	gFPSTextTexture.free();
 
 	/* Free Global Font */
 	TTF_CloseFont(gFont);
@@ -127,9 +112,12 @@ int main (int argc, char** argv) {
 	//Black text color
 	SDL_Color textColor = {0, 0, 0, 255};
 	//Current time
-	MyTimer timer;
+	MyTimer fpsTimer;
 	//In-memory text stream
 	std::stringstream timeText;
+	//Start counting FPS
+	int countedFrames = 0;
+	fpsTimer.start();
 
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
@@ -138,30 +126,18 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
-			} else if (event.type == SDL_KEYDOWN) {
-				//Start/Stop
-				if (event.key.keysym.sym == SDLK_s) {
-					if (timer.isStarted()) {
-						timer.stop();
-					} else {
-						timer.start();
-					}
-				} else if (event.key.keysym.sym == SDLK_p) {
-					if (timer.isPaused()) {
-						timer.unpause();
-					} else {
-						timer.pause();
-					}
-				}
 			}
 		}
 
+		//Calculate fps
+		float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
+
 		//Set text to be rendered
 		timeText.str("");
-		timeText << "Seconds since start time " << (timer.getTicks() / 1000.f);
+		timeText << "Average FPS " << avgFPS;
 
 		//Render text
-		if (!gTimeTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor)) {
+		if (!gFPSTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor)) {
 			logError(std::cout, "Unable to render time texture.");
 		}
 
@@ -170,13 +146,12 @@ int main (int argc, char** argv) {
 		SDL_RenderClear(gRenderer);
 
 		//Render textures
-		gStartPromptTextTexture.render((SCREEN_WIDTH - gStartPromptTextTexture.getWidth()) / 2, 0);
-		gPausePromptTextTexture.render((SCREEN_WIDTH - gPausePromptTextTexture.getWidth()) / 2, gStartPromptTextTexture.getHeight());
-		gTimeTextTexture.render((SCREEN_WIDTH - gTimeTextTexture.getWidth()) / 2,
-			(SCREEN_HEIGHT - gTimeTextTexture.getHeight()) / 2);
+		gFPSTextTexture.render((SCREEN_WIDTH - gFPSTextTexture.getWidth()) / 2,
+			(SCREEN_HEIGHT - gFPSTextTexture.getHeight()) / 2);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
+		countedFrames++;
 	}
 
 	close();
