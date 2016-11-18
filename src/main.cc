@@ -5,6 +5,8 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
+#include "MyTexture.h"
+#include "MyTimer.h"
 #include "log_error.h"
 #include "res_path.h"
 
@@ -61,10 +63,16 @@ bool loadMedia() {
 	/* Set Text Color */
 	SDL_Color textColor = {0, 0, 0, 255};
 
-	/* Load Prompt Texture */
-	if (!gPromptTextTexture.loadFromRenderedText(
-		"Press Enter to Reset Start Timer.", textColor)) {
-		logError(std::cout, "Failed to render prompt texture.");
+	/* Load Start/Pause Prompt Textures */
+	if (!gStartPromptTextTexture.loadFromRenderedText(
+		"Press S to Start or Stop the Timer.", textColor)) {
+		logError(std::cout, "Failed to render start/stop prompt texture.");
+		return false;
+	}
+
+	if (!gPausePromptTextTexture.loadFromRenderedText(
+		"Press P to Pause or Unpause the Timer.", textColor)) {
+		logError(std::cout, "Failed to render pause/unpause prompt texture.");
 		return false;
 	}
 
@@ -73,7 +81,8 @@ bool loadMedia() {
 
 void close() {
 	/* Free loaded textures */
-	gPromptTextTexture.free();
+	gStartPromptTextTexture.free();
+	gPausePromptTextTexture.free();
 	gTimeTextTexture.free();
 
 	/* Free Global Font */
@@ -87,7 +96,7 @@ void close() {
 	gWindow = nullptr;
 
 	/* Quit SDL Subsystems */
-	Mix_Quit();
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -118,7 +127,7 @@ int main (int argc, char** argv) {
 	//Black text color
 	SDL_Color textColor = {0, 0, 0, 255};
 	//Current time
-	Uint32 startTime = 0;
+	MyTimer timer;
 	//In-memory text stream
 	std::stringstream timeText;
 
@@ -129,14 +138,27 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
-			} else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) {
-				startTime = SDL_GetTicks();
+			} else if (event.type == SDL_KEYDOWN) {
+				//Start/Stop
+				if (event.key.keysym.sym == SDLK_s) {
+					if (timer.isStarted()) {
+						timer.stop();
+					} else {
+						timer.start();
+					}
+				} else if (event.key.keysym.sym == SDLK_p) {
+					if (timer.isPaused()) {
+						timer.unpause();
+					} else {
+						timer.pause();
+					}
+				}
 			}
 		}
 
 		//Set text to be rendered
 		timeText.str("");
-		timeText << "Milliseconds since start time " << SDL_GetTicks() - startTime;
+		timeText << "Seconds since start time " << (timer.getTicks() / 1000.f);
 
 		//Render text
 		if (!gTimeTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor)) {
@@ -148,8 +170,10 @@ int main (int argc, char** argv) {
 		SDL_RenderClear(gRenderer);
 
 		//Render textures
-		gPromptTextTexture.render(0, 0);
-		gTimeTextTexture.render(100, 100);
+		gStartPromptTextTexture.render((SCREEN_WIDTH - gStartPromptTextTexture.getWidth()) / 2, 0);
+		gPausePromptTextTexture.render((SCREEN_WIDTH - gPausePromptTextTexture.getWidth()) / 2, gStartPromptTextTexture.getHeight());
+		gTimeTextTexture.render((SCREEN_WIDTH - gTimeTextTexture.getWidth()) / 2,
+			(SCREEN_HEIGHT - gTimeTextTexture.getHeight()) / 2);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
