@@ -2,13 +2,14 @@
 
 #include <iostream>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 #include "log_error.h"
 #include "res_path.h"
 
 bool init() {
 	/* Initialize SDL */
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
 		logSDLError(std::cout, "SDL_Init");
 		return false;
 	}
@@ -39,21 +40,32 @@ bool init() {
 		return false;
 	}
 
-	/* Initialize SDL_ttf */
-	if (TTF_Init() == -1) {
-		logTTFError(std::cout, "TTF_Init");
+	/* Initialize SDL_mixer */
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) != 0) {
+		logMixError(std::cout, "Mix_OpenAudio");
+		return false;
 	}
 
 	return true;
 }
 
 void close() {
-	/* Free Loaded Textures */
-	gTextTexture.free();
+	/* Free loaded image */
+	gPromptTexture.free();
 
-	/* Free Global Font */
-	TTF_CloseFont(gFont);
-	gFont = nullptr;
+	/* Free Sound Effects */
+	Mix_FreeChunk(gScratch);
+	Mix_FreeChunk(gHigh);
+	Mix_FreeChunk(gMedium);
+	Mix_FreeChunk(gLow);
+	gScratch = nullptr;
+	gHigh = nullptr;
+	gMedium = nullptr;
+	gLow = nullptr;
+
+	/* Free Music */
+	Mix_FreeMusic(gMusic);
+	gMusic = nullptr;
 
 	/* Destroy Window */
 	SDL_DestroyRenderer(gRenderer);
@@ -62,26 +74,54 @@ void close() {
 	gWindow = nullptr;
 
 	/* Quit SDL Subsystems */
-	TTF_Quit();
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
 
 bool loadMedia() {
-	//Open the font
-	std::string path = getResourcePath() + "OpenSans-Regular.ttf";
-	gFont = TTF_OpenFont(path.c_str(), 28);
-
-	if (gFont == nullptr) {
-		logTTFError(std::cout, "TTF_OpenFont");
+	/* Load Prompt Texture */
+	if (!gPromptTexture.loadFromFile("prompt.png")) {
+		logError(std::cout, "Failed to load prompt texture.");
 		return false;
 	}
 
-	//Render text
-	SDL_Color textColor = {0, 0, 0}; //RGBa
-	if (!gTextTexture.loadFromRenderedText(
-		"The quick brown fox jumps over the lazy dog", textColor)) {
-		logError(std::cout, "Failed to render text texture.");
+	/* Load Music */
+	const std::string resPath = getResourcePath();
+	std::string path;
+	path = resPath + "beat.wav";
+	gMusic = Mix_LoadMUS(path.c_str());
+	if (gMusic == nullptr) {
+		logMixError(std::cout, "Mix_LoadMUS");
+		return false;
+	}
+
+	/* Load Sound Effects */
+	path = resPath + "scratch.wav";
+	gScratch = Mix_LoadWAV(path.c_str());
+	if (gScratch == nullptr) {
+		logMixError(std::cout, "Mix_LoadWAV");
+		return false;
+	}
+
+	path = resPath + "high.wav";
+	gHigh = Mix_LoadWAV(path.c_str());
+	if (gHigh == nullptr) {
+		logMixError(std::cout, "Mix_LoadWAV");
+		return false;
+	}
+
+	path = resPath + "medium.wav";
+	gMedium = Mix_LoadWAV(path.c_str());
+	if (gMedium == nullptr) {
+		logMixError(std::cout, "Mix_LoadWAV");
+		return false;
+	}
+
+	path = resPath + "low.wav";
+	gLow = Mix_LoadWAV(path.c_str());
+	if (gLow == nullptr) {
+		logMixError(std::cout, "Mix_LoadWAV");
 		return false;
 	}
 
@@ -97,6 +137,7 @@ int main (int argc, char** argv) {
 		close();
 		return 1;
 	}
+
 	/* Load Media */
 	if (!loadMedia()) {
 		close();
@@ -118,6 +159,54 @@ int main (int argc, char** argv) {
 			if (event.type == SDL_QUIT ||
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
+			} else if (event.type == SDL_KEYDOWN) {
+				switch (event.key.keysym.sym) {
+					//Play high sound effect
+					case SDLK_1:
+						//Arguments:
+						//	-Channel, -1 for nearest available channel
+						//	-Sound effect
+						//	-Number of times to repeat per button press
+						Mix_PlayChannel(-1, gHigh, 0);
+						break;
+
+					//Play medium sound effect
+					case SDLK_2:
+						Mix_PlayChannel(-1, gMedium, 0);
+						break;
+
+					//Play low sound effect
+					case SDLK_3:
+						Mix_PlayChannel(-1, gLow, 0);
+						break;
+
+					//Play scratch sound effect
+					case SDLK_4:
+						Mix_PlayChannel(-1, gScratch, 0);
+						break;
+
+					case SDLK_9:
+						//If no music is playing
+						if (Mix_PlayingMusic() == 0) {
+							//Play the music
+							Mix_PlayMusic(gMusic, -1);
+						} else {
+							//If music is paused
+							if (Mix_PausedMusic() == 1) {
+								//Resume music
+								Mix_ResumeMusic();
+							} else {
+								//Pause music
+								Mix_PauseMusic();
+							}
+						}
+						break;
+
+					case SDLK_0:
+					//Stop music
+					Mix_HaltMusic();
+					break;
+				}
 			}
 		}
 
@@ -125,8 +214,8 @@ int main (int argc, char** argv) {
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		//Render text
-		gTextTexture.render(0, 0);
+		//Render prompt
+		gPromptTexture.render(0, 0);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
