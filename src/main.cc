@@ -26,8 +26,7 @@ bool init() {
 	}
 
 	/* Create renderer for window */
-	gRenderer = SDL_CreateRenderer(gWindow, -1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr) {
 		logSDLError(std::cout, "SDL_CreateRenderer");
 		return false;
@@ -111,8 +110,10 @@ int main (int argc, char** argv) {
 	SDL_Event event;
 	//Black text color
 	SDL_Color textColor = {0, 0, 0, 255};
-	//Current time
+	//FPS timer
 	MyTimer fpsTimer;
+	//FPS cap timer
+	MyTimer capTimer;
 	//In-memory text stream
 	std::stringstream timeText;
 	//Start counting FPS
@@ -120,6 +121,8 @@ int main (int argc, char** argv) {
 	fpsTimer.start();
 
 	while (!quit) {
+		//Start cap timer
+		capTimer.start();
 		while (SDL_PollEvent(&event) != 0) {
 			//User requests to quit
 			//Either by closing window, or by pressing the esc key
@@ -152,6 +155,13 @@ int main (int argc, char** argv) {
 		//Update screen
 		SDL_RenderPresent(gRenderer);
 		countedFrames++;
+
+		//If frame finished early
+		int frameTicks = capTimer.getTicks();
+		if (frameTicks < SCREEN_TICKS_PER_FRAME) {
+			//Wait remaining time
+			SDL_Delay(SCREEN_TICKS_PER_FRAME - frameTicks);
+		}
 	}
 
 	close();
