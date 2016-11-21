@@ -5,6 +5,7 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
+#include "Dot.h"
 #include "MyTexture.h"
 #include "MyTimer.h"
 #include "log_error.h"
@@ -17,6 +18,11 @@ bool init() {
 		return false;
 	}
 
+	/* Set Linear Texture Filtering */
+	if (!SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
+		logError(std::cout, "Warning: Linear texture filtering not enabled.");
+	}
+
 	/* Create Window */
 	gWindow = SDL_CreateWindow("SDL Testing", SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -26,7 +32,8 @@ bool init() {
 	}
 
 	/* Create renderer for window */
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	gRenderer = SDL_CreateRenderer(gWindow, -1,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (gRenderer == nullptr) {
 		logSDLError(std::cout, "SDL_CreateRenderer");
 		return false;
@@ -62,12 +69,19 @@ bool loadMedia() {
 	/* Set Text Color */
 	SDL_Color textColor = {0, 0, 0, 255};
 
+	/* Load Dot Texture */
+	if (!gDotTexture.loadFromFile("dot.png")) {
+		logError(std::cout, "Failed to load dot texture.");
+		return false;
+	}
+
 	return true;
 }
 
 void close() {
 	/* Free loaded textures */
 	gFPSTextTexture.free();
+	gDotTexture.free();
 
 	/* Free Global Font */
 	TTF_CloseFont(gFont);
@@ -108,12 +122,12 @@ int main (int argc, char** argv) {
 	bool quit = false;
 	//Main event handler
 	SDL_Event event;
+	//Dot that will be moving around
+	Dot dot;
 	//Black text color
 	SDL_Color textColor = {0, 0, 0, 255};
 	//FPS timer
 	MyTimer fpsTimer;
-	//FPS cap timer
-	MyTimer capTimer;
 	//In-memory text stream
 	std::stringstream timeText;
 	//Start counting FPS
@@ -121,8 +135,6 @@ int main (int argc, char** argv) {
 	fpsTimer.start();
 
 	while (!quit) {
-		//Start cap timer
-		capTimer.start();
 		while (SDL_PollEvent(&event) != 0) {
 			//User requests to quit
 			//Either by closing window, or by pressing the esc key
@@ -130,7 +142,16 @@ int main (int argc, char** argv) {
 					(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
 				quit = true;
 			}
+			dot.handleEvent(event);
 		}
+
+		//Clear screen
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderClear(gRenderer);
+
+		//Move & render dot
+		dot.move();
+		dot.render();
 
 		//Calculate fps
 		float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
@@ -139,14 +160,10 @@ int main (int argc, char** argv) {
 		timeText.str("");
 		timeText << "Average FPS " << avgFPS;
 
-		//Render text
+		//Load text
 		if (!gFPSTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor)) {
-			logError(std::cout, "Unable to render time texture.");
+			logError(std::cout, "Unable to render FPS texture.");
 		}
-
-		//Clear screen
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderClear(gRenderer);
 
 		//Render textures
 		gFPSTextTexture.render((SCREEN_WIDTH - gFPSTextTexture.getWidth()) / 2,
@@ -155,13 +172,6 @@ int main (int argc, char** argv) {
 		//Update screen
 		SDL_RenderPresent(gRenderer);
 		countedFrames++;
-
-		//If frame finished early
-		int frameTicks = capTimer.getTicks();
-		if (frameTicks < SCREEN_TICKS_PER_FRAME) {
-			//Wait remaining time
-			SDL_Delay(SCREEN_TICKS_PER_FRAME - frameTicks);
-		}
 	}
 
 	close();
