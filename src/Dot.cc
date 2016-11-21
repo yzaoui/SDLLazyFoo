@@ -3,14 +3,11 @@
 #include "helpers.h"
 #include "MyTexture.h"
 
-extern const int SCREEN_WIDTH = 640;
-extern const int SCREEN_HEIGHT = 480;
+extern const int LEVEL_WIDTH = 1280;
+extern const int LEVEL_HEIGHT = 960;
 extern MyTexture gDotTexture;
 
-Dot::Dot() : posX_(0), posY_(0), velX_(0), velY_(0) {
-	collider_.w = DOT_WIDTH;
-	collider_.h = DOT_HEIGHT;
-}
+Dot::Dot() : posX_(0), posY_(0), velX_(0), velY_(0) {}
 
 void Dot::handleEvent(SDL_Event& e) {
 	//If key was pressed
@@ -50,32 +47,34 @@ void Dot::handleEvent(SDL_Event& e) {
 	}
 }
 
-void Dot::move(SDL_Rect& wall) {
+void Dot::move() {
 	//Move dot left or right
 	posX_ += velX_;
-	collider_.x = posX_;
 
-	//If dot went too far left or right, or collided
-	if ((posX_ < 0) || (posX_ + DOT_WIDTH > SCREEN_WIDTH)
-			|| checkCollision(collider_, wall)) {
+	//If dot went too far left or right
+	if ((posX_ < 0) || (posX_ + DOT_WIDTH > LEVEL_WIDTH)) {
 		//Move back
 		posX_ -= velX_;
-		collider_.x = posX_;
 	}
 
 	//Move dot up or down
 	posY_ += velY_;
-	collider_.y = posY_;
 
-	//If dot went too far up or down, or collided
-	if ((posY_ < 0) || (posY_ + DOT_WIDTH > SCREEN_HEIGHT)
-			|| checkCollision(collider_, wall)) {
+	//If dot went too far up or down
+	if ((posY_ < 0) || (posY_ + DOT_WIDTH > LEVEL_HEIGHT)) {
 		//Move back
 		posY_ -= velY_;
-		collider_.y = posY_;
 	}
 }
 
-void Dot::render() {
-	gDotTexture.render(posX_, posY_);
+void Dot::render(int camX, int camY) const {
+	gDotTexture.render(posX_ - camX, posY_ - camY);
+}
+
+int Dot::getPosX() const {
+	return posX_;
+}
+
+int Dot::getPosY() const {
+	return posY_;
 }

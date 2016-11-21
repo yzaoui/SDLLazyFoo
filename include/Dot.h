@@ -12,20 +12,22 @@ public:
 	//Maximum dot axis velocity
 	static const int DOT_VEL = 10;
 
+	//Constructor
 	Dot();
 	//Take key presses and adjust dot velocity
-	void handleEvent(SDL_Event& e);
+	void handleEvent(SDL_Event&);
 	//Move dot
-	void move(SDL_Rect& wall);
+	void move();
 	//Show dot on screen
-	void render();
+	void render(int camX, int camY) const;
+	//Position accessors
+	int getPosX() const;
+	int getPosY() const;
 private:
 	//X and Y offsets of dot
 	int posX_, posY_;
 	//Velocity of dot
 	int velX_, velY_;
-	//Collision box
-	SDL_Rect collider_;
 };
 
 #endif

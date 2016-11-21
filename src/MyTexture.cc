@@ -8,7 +8,6 @@
 #include "res_path.h"
 
 //Do this better later on
-extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
 extern TTF_Font* gFont;
 

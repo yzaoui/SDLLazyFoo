@@ -38,12 +38,17 @@ TTF_Font* gFont;
 
 //The FPS texture
 MyTexture gFPSTextTexture;
-
-//Dot texture
+//The background texture
+MyTexture gBGTexture;
+//The dot texture
 MyTexture gDotTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+
+//Level dimension constants
+const int LEVEL_WIDTH = 1280;
+const int LEVEL_HEIGHT = 960;
 
 #endif

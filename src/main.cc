@@ -72,6 +72,12 @@ bool loadMedia() {
 		return false;
 	}
 
+	/* Load Background Texture */
+	if (!gBGTexture.loadFromFile("levelbackground.png")) {
+		logError(std::cout, "Failed to load dot texture.");
+		return false;
+	}
+
 	return true;
 }
 
@@ -79,6 +85,7 @@ void close() {
 	/* Free loaded textures */
 	gFPSTextTexture.free();
 	gDotTexture.free();
+	gBGTexture.free();
 
 	/* Free Global Font */
 	TTF_CloseFont(gFont);
@@ -131,8 +138,8 @@ int main (int argc, char** argv) {
 	//Start counting FPS
 	int countedFrames = 0;
 	fpsTimer.start();
-	//Set wall
-	SDL_Rect wall = {300, 40, 40, 400};
+	//Camera
+	SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
 	/* Main loop */
 	while (!quit) {
@@ -146,16 +153,29 @@ int main (int argc, char** argv) {
 			dot.handleEvent(event);
 		}
 
-		dot.move(wall);
+		dot.move();
+
+		//Center camera over dot
+		camera.x = (dot.getPosX() + Dot::DOT_WIDTH / 2) - SCREEN_WIDTH / 2;
+		camera.y = (dot.getPosY() + Dot::DOT_HEIGHT / 2) - SCREEN_HEIGHT / 2;
+
+		//Keep camera in bounds
+		if (camera.x < 0) {
+			camera.x = 0;
+		}
+		if (camera.y < 0) {
+			camera.y = 0;
+		}
+		if (camera.x > LEVEL_WIDTH - camera.w) {
+			camera.x = LEVEL_WIDTH - camera.w;
+		}
+		if (camera.y > LEVEL_HEIGHT - camera.h) {
+			camera.y = LEVEL_HEIGHT - camera.h;
+		}
 
 		//Clear screen
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
-
-		//Render wall & dot
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderDrawRect(gRenderer, &wall);
-		dot.render();
 
 		//Calculate fps
 		float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
@@ -169,7 +189,9 @@ int main (int argc, char** argv) {
 			logError(std::cout, "Unable to render FPS texture.");
 		}
 
-		//Render text
+		//Render background, dot, text
+		gBGTexture.render(0, 0, &camera);
+		dot.render(camera.x, camera.y);
 		gFPSTextTexture.render(SCREEN_WIDTH - gFPSTextTexture.getWidth(), 0);
 
 		//Update screen
