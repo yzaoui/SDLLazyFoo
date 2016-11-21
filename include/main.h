@@ -16,18 +16,16 @@
 bool init();
 
 /**
- * Frees surface and window, and shuts down SDL.
- */
-void close();
-
-/**
  * Loads media.
  *
  * @return true on success, false on failure.
  */
 bool loadMedia();
 
-
+/**
+ * Frees surface and window, and shuts down SDL.
+ */
+void close();
 
 //The window we'll be rendering to
 SDL_Window* gWindow = nullptr;

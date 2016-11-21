@@ -1,7 +1,8 @@
 #ifndef _DOT_H
 #define _DOT_H
 
-#include <SDL.h>
+#include <SDL_events.h>
+#include <SDL_rect.h>
 
 class Dot {
 public:
@@ -15,7 +16,7 @@ public:
 	//Take key presses and adjust dot velocity
 	void handleEvent(SDL_Event& e);
 	//Move dot
-	void move();
+	void move(SDL_Rect& wall);
 	//Show dot on screen
 	void render();
 private:
@@ -23,6 +24,8 @@ private:
 	int posX_, posY_;
 	//Velocity of dot
 	int velX_, velY_;
+	//Collision box
+	SDL_Rect collider_;
 };
 
 #endif

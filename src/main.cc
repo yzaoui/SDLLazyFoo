@@ -66,9 +66,6 @@ bool loadMedia() {
 		return false;
 	}
 
-	/* Set Text Color */
-	SDL_Color textColor = {0, 0, 0, 255};
-
 	/* Load Dot Texture */
 	if (!gDotTexture.loadFromFile("dot.png")) {
 		logError(std::cout, "Failed to load dot texture.");
@@ -118,6 +115,7 @@ int main (int argc, char** argv) {
 	/******************************
 	 * Game Loop
 	 ******************************/
+	/* Variables */
 	//Main loop flag
 	bool quit = false;
 	//Main event handler
@@ -133,7 +131,10 @@ int main (int argc, char** argv) {
 	//Start counting FPS
 	int countedFrames = 0;
 	fpsTimer.start();
+	//Set wall
+	SDL_Rect wall = {300, 40, 40, 400};
 
+	/* Main loop */
 	while (!quit) {
 		while (SDL_PollEvent(&event) != 0) {
 			//User requests to quit
@@ -145,12 +146,15 @@ int main (int argc, char** argv) {
 			dot.handleEvent(event);
 		}
 
+		dot.move(wall);
+
 		//Clear screen
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		//Move & render dot
-		dot.move();
+		//Render wall & dot
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_RenderDrawRect(gRenderer, &wall);
 		dot.render();
 
 		//Calculate fps
@@ -158,16 +162,15 @@ int main (int argc, char** argv) {
 
 		//Set text to be rendered
 		timeText.str("");
-		timeText << "Average FPS " << avgFPS;
+		timeText << avgFPS;
 
 		//Load text
 		if (!gFPSTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor)) {
 			logError(std::cout, "Unable to render FPS texture.");
 		}
 
-		//Render textures
-		gFPSTextTexture.render((SCREEN_WIDTH - gFPSTextTexture.getWidth()) / 2,
-			(SCREEN_HEIGHT - gFPSTextTexture.getHeight()) / 2);
+		//Render text
+		gFPSTextTexture.render(SCREEN_WIDTH - gFPSTextTexture.getWidth(), 0);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
