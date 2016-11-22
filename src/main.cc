@@ -74,9 +74,35 @@ bool loadMedia() {
 
 	/* Load Background Texture */
 	if (!gBGTexture.loadFromFile("levelbackground.png")) {
-		logError(std::cout, "Failed to load dot texture.");
+		logError(std::cout, "Failed to load background texture.");
 		return false;
 	}
+
+	/* Load Red Texture */
+	if (!gRedTexture.loadFromFile("particleRed.png")) {
+		logError(std::cout, "Failed to load red particle texture.");
+		return false;
+	}
+	/* Load Green Texture */
+	if (!gGreenTexture.loadFromFile("particleGreen.png")) {
+		logError(std::cout, "Failed to load green particle texture.");
+		return false;
+	}
+	/* Load Blue Texture */
+	if (!gBlueTexture.loadFromFile("particleBlue.png")) {
+		logError(std::cout, "Failed to load blue particle texture.");
+		return false;
+	}
+	/* Load Shimmer Texture */
+	if (!gShimmerTexture.loadFromFile("particleShimmer.png")) {
+		logError(std::cout, "Failed to load shimmer particle texture.");
+		return false;
+	}
+
+	gRedTexture.setAlpha(192);
+	gGreenTexture.setAlpha(192);
+	gBlueTexture.setAlpha(192);
+	gShimmerTexture.setAlpha(192);
 
 	return true;
 }
@@ -85,6 +111,10 @@ void close() {
 	/* Free loaded textures */
 	gFPSTextTexture.free();
 	gDotTexture.free();
+	gRedTexture.free();
+	gGreenTexture.free();
+	gBlueTexture.free();
+	gShimmerTexture.free();
 	gBGTexture.free();
 
 	/* Free Global Font */

@@ -7,7 +7,18 @@ extern const int LEVEL_WIDTH = 1280;
 extern const int LEVEL_HEIGHT = 960;
 extern MyTexture gDotTexture;
 
-Dot::Dot() : posX_(0), posY_(0), velX_(0), velY_(0) {}
+Dot::Dot() : posX_(0), posY_(0), velX_(0), velY_(0) {
+	for (int i = 0; i < TOTAL_PARTICLES; i++) {
+		particles_[i] = new Particle(posX_, posY_);
+	}
+}
+
+Dot::~Dot() {
+	//Delete particles
+	for (int i = 0; i < TOTAL_PARTICLES; i++) {
+		delete particles_[i];
+	}
+}
 
 void Dot::handleEvent(SDL_Event& e) {
 	//If key was pressed
@@ -67,8 +78,9 @@ void Dot::move() {
 	}
 }
 
-void Dot::render(int camX, int camY) const {
+void Dot::render(int camX, int camY) {
 	gDotTexture.render(posX_ - camX, posY_ - camY);
+	renderParticles(camX, camY);
 }
 
 int Dot::getPosX() const {
@@ -78,3 +90,17 @@ int Dot::getPosX() const {
 int Dot::getPosY() const {
 	return posY_;
 }
+
+void Dot::renderParticles(int camX, int camY) {
+	for (int i = 0; i < TOTAL_PARTICLES; i++) {
+		if (particles_[i]->isDead()) {
+			delete particles_[i];
+			particles_[i] = new Particle(posX_ - camX, posY_ - camY);
+		}
+	}
+
+	for(int i = 0; i < TOTAL_PARTICLES; i++) {
+		particles_[i]->render();
+	}
+}
+

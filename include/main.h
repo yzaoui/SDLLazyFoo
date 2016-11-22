@@ -42,6 +42,11 @@ MyTexture gFPSTextTexture;
 MyTexture gBGTexture;
 //The dot texture
 MyTexture gDotTexture;
+//The particle textures
+MyTexture gRedTexture;
+MyTexture gGreenTexture;
+MyTexture gBlueTexture;
+MyTexture gShimmerTexture;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
