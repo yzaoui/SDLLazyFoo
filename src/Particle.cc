@@ -21,13 +21,13 @@ Particle::Particle(int x, int y) {
 	}
 }
 
-void Particle::render() {
+void Particle::render(int camX, int camY) {
 	//Show image
-	texture_->render(posX_, posY_);
+	texture_->render(posX_ - camX, posY_ - camY);
 
 	//Show shimmer
 	if (frame_ % 2 == 0) {
-		gShimmerTexture.render(posX_, posY_);
+		gShimmerTexture.render(posX_ - camX, posY_ - camY);
 	}
 
 	//Animate

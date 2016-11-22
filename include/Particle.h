@@ -8,7 +8,7 @@ const int TOTAL_PARTICLES = 20;
 class Particle {
 public:
 	Particle(int x, int y);
-	void render();
+	void render(int camX, int camY);
 	bool isDead();
 private:
 	int posX_, posY_;

@@ -95,12 +95,12 @@ void Dot::renderParticles(int camX, int camY) {
 	for (int i = 0; i < TOTAL_PARTICLES; i++) {
 		if (particles_[i]->isDead()) {
 			delete particles_[i];
-			particles_[i] = new Particle(posX_ - camX, posY_ - camY);
+			particles_[i] = new Particle(posX_, posY_);
 		}
 	}
 
 	for(int i = 0; i < TOTAL_PARTICLES; i++) {
-		particles_[i]->render();
+		particles_[i]->render(camX, camY);
 	}
 }
 
