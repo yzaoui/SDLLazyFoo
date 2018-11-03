@@ -8,15 +8,15 @@ extern const int LEVEL_HEIGHT = 960;
 extern MyTexture gDotTexture;
 
 Dot::Dot() : posX_(0), posY_(0), velX_(0), velY_(0) {
-	for (int i = 0; i < TOTAL_PARTICLES; i++) {
-		particles_[i] = new Particle(posX_, posY_);
+	for (auto &particle : particles_) {
+		particle = new Particle(posX_, posY_);
 	}
 }
 
 Dot::~Dot() {
 	//Delete particles
-	for (int i = 0; i < TOTAL_PARTICLES; i++) {
-		delete particles_[i];
+	for (auto &particle : particles_) {
+		delete particle;
 	}
 }
 
@@ -92,15 +92,15 @@ int Dot::getPosY() const {
 }
 
 void Dot::renderParticles(int camX, int camY) {
-	for (int i = 0; i < TOTAL_PARTICLES; i++) {
-		if (particles_[i]->isDead()) {
-			delete particles_[i];
-			particles_[i] = new Particle(posX_, posY_);
+	for (auto &particle : particles_) {
+		if (particle->isDead()) {
+			delete particle;
+			particle = new Particle(posX_, posY_);
 		}
 	}
 
-	for(int i = 0; i < TOTAL_PARTICLES; i++) {
-		particles_[i]->render(camX, camY);
+	for (auto &particle : particles_) {
+		particle->render(camX, camY);
 	}
 }
 

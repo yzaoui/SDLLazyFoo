@@ -133,7 +133,7 @@ void close() {
 	SDL_Quit();
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
 	/******************************
 	 * Initialization
 	 ******************************/
@@ -215,7 +215,7 @@ int main (int argc, char** argv) {
 		timeText << avgFPS;
 
 		//Load text
-		if (!gFPSTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor)) {
+		if (!gFPSTextTexture.loadFromRenderedText(timeText.str(), textColor)) {
 			logError(std::cout, "Unable to render FPS texture.");
 		}
 
