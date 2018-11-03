@@ -47,6 +47,13 @@ MyTexture gRedTexture;
 MyTexture gGreenTexture;
 MyTexture gBlueTexture;
 MyTexture gShimmerTexture;
+//Music
+Mix_Music* gMusic = nullptr;
+//Sound effects
+Mix_Chunk* gScratch = nullptr;
+Mix_Chunk* gHigh = nullptr;
+Mix_Chunk* gMedium = nullptr;
+Mix_Chunk* gLow = nullptr;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
