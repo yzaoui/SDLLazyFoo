@@ -47,6 +47,8 @@ MyTexture gRedTexture;
 MyTexture gGreenTexture;
 MyTexture gBlueTexture;
 MyTexture gShimmerTexture;
+//Music controls image
+MyTexture gMusicControlsTexture;
 //Music
 Mix_Music* gMusic = nullptr;
 //Sound effects

@@ -107,6 +107,12 @@ bool loadMedia() {
 		return false;
 	}
 
+	/* Load music controls texture */
+	if (!gMusicControlsTexture.loadFromFile("prompt.png")) {
+		logError(std::cout, "Failed to load music controls texture.");
+		return false;
+	}
+
 	gRedTexture.setAlpha(192);
 	gGreenTexture.setAlpha(192);
 	gBlueTexture.setAlpha(192);
@@ -161,6 +167,21 @@ void close() {
 	gBlueTexture.free();
 	gShimmerTexture.free();
 	gBGTexture.free();
+	gMusicControlsTexture.free();
+
+	/* Free sound effects */
+	Mix_FreeChunk(gScratch);
+	Mix_FreeChunk(gHigh);
+	Mix_FreeChunk(gMedium);
+	Mix_FreeChunk(gLow);
+	gScratch = nullptr;
+	gHigh = nullptr;
+	gMedium = nullptr;
+	gLow = nullptr;
+
+	/* Free music */
+	Mix_FreeMusic(gMusic);
+	gMusic = nullptr;
 
 	/* Free Global Font */
 	TTF_CloseFont(gFont);
@@ -174,6 +195,7 @@ void close() {
 
 	/* Quit SDL Subsystems */
 	TTF_Quit();
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -316,6 +338,7 @@ int main(int argc, char** argv) {
 
 		//Render background, dot, text
 		gBGTexture.render(0, 0, &camera);
+		gMusicControlsTexture.render(100 - camera.x, 100 - camera.y);
 		dot.render(camera.x, camera.y);
 		gFPSTextTexture.render(SCREEN_WIDTH - gFPSTextTexture.getWidth(), 0);
 
